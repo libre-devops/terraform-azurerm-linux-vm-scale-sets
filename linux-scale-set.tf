@@ -6,17 +6,15 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     azurerm_marketplace_agreement.plan_acceptance_custom
   ]
 
-  name                  = "${var.vm_hostname}${format("%02d", count.index + 1)}"
-  resource_group_name   = var.rg_name
-  location              = var.location
-  network_interface_ids = [azurerm_network_interface.nic[count.index].id]
-  license_type          = var.license_type
-  computer_name         = "${var.vm_hostname}${format("%02d", count.index + 1)}"
-  admin_username        = var.admin_username
-  admin_password        = var.admin_password
-  zone                  = var.availability_zone == "alternate" ? (count.index % 3) + 1 : null // Alternates zones for VMs in count, 1, 2 then 3. Use availability set if you want HA.
-  instances             = var.instances
-  sku                   = var.vm_size
+  name                 = "${var.vm_hostname}${format("%02d", count.index + 1)}"
+  resource_group_name  = var.rg_name
+  location             = var.location
+  computer_name_prefix = var.computer_name_prefix
+  admin_username       = var.admin_username
+  admin_password       = var.admin_password
+  edge_zone            = var.edge_zone
+  instances            = var.instances
+  sku                  = var.vm_size
 
   dynamic "network_interface" {
     for_each = lookup(var.network_interfaces, "network_interface", {}) != {} ? [1] : []
@@ -53,7 +51,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
                 content {
                   type = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "type", null)
                   tag  = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "tag", null)
-
                 }
               }
             }
@@ -68,8 +65,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   encryption_at_host_enabled = var.enable_encryption_at_host
 
   #checkov:skip=CKV_AZURE_50:Ensure Virtual Machine extensions are not installed
-  allow_extension_operations = var.allow_extension_operations
-  provision_vm_agent         = var.provision_vm_agent
+  provision_vm_agent = var.provision_vm_agent
 
   // Uses calculator
   dynamic "source_image_reference" {
@@ -156,10 +152,18 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   }
 
   os_disk {
-    name                 = "osdisk-${var.vm_hostname}${format("%02d", count.index + 1)}"
+    name                 = "osdisk-${var.vm_hostname}"
     caching              = "ReadWrite"
     storage_account_type = var.storage_account_type
     disk_size_gb         = var.vm_os_disk_size_gb
+    disk_iops_read_write = try(var.disk_iops_read_write, null)
+    disk_mbps_read_write = try(var.disk_mbps_read_write, null)
+
+    write_accelerator_enabled = var.write_accelerator_enabled
+
+    diff_disk_settings {
+      option = try(var.diff_disk_setting_option, null)
+    }
   }
 
   boot_diagnostics {

@@ -16,12 +16,6 @@ variable "allocation_method" {
   default     = "Dynamic"
 }
 
-variable "allow_extension_operations" {
-  description = "Whether extensions are allowed to execute on the VM"
-  type        = bool
-  default     = true
-}
-
 variable "asg_name" {
   description = "The name of the application security group to be made"
   type        = string
@@ -33,10 +27,20 @@ variable "availability_zone" {
   type        = string
 }
 
+variable "computer_name_prefix" {
+  type        = string
+  description = "The name prefix of the scale set"
+}
+
 variable "data_disk_size_gb" {
   description = "Storage data disk size size."
   type        = number
   default     = 30
+}
+
+variable "edge_zone" {
+  type        = string
+  description = "The edge zone for the scale set in the Azure region"
 }
 
 variable "enable_accelerated_networking" {
