@@ -1,32 +1,49 @@
-output "sa_id" {
-  value       = azurerm_storage_account.sa.id
-  description = "The ID of the storage account"
+output "asg_id" {
+  description = "The id of the ASG"
+  value       = azurerm_application_security_group.asg.name
 }
 
-output "sa_name" {
-  value       = azurerm_storage_account.sa.name
-  description = "The name of the storage account"
+output "asg_name" {
+  description = "The name of the ASG"
+  value       = azurerm_application_security_group.asg.name
 }
 
-output "sa_primary_access_key" {
-  value       = azurerm_storage_account.sa.primary_access_key
-  description = "The primary access key of the storage account"
-  sensitive   = true
+output "nic_id" {
+  description = "The ID of the nics"
+  value       = azurerm_network_interface.nic.*.id
 }
 
-output "sa_primary_blob_endpoint" {
-  value       = azurerm_storage_account.sa.primary_blob_endpoint
-  description = "The primary blob endpoint of the storage account"
+output "nic_ip_config_name" {
+  description = "The name of the IP Configurations"
+  value       = azurerm_network_interface.nic.*.ip_configuration
 }
 
-output "sa_primary_connection_string" {
-  value       = azurerm_storage_account.sa.primary_blob_connection_string
-  description = "The primary blob connection string of the storage account"
-  sensitive   = true
+output "nic_ip_private_ip" {
+  description = "The private IP assigned to the NIC"
+  value       = azurerm_network_interface.nic.*.private_ip_address
 }
 
-output "sa_secondary_access_key" {
-  value       = azurerm_storage_account.sa.secondary_access_key
-  description = "The secondary access key of the storage account"
-  sensitive   = true
+output "vm_amount" {
+  description = "The amount of VMs passed to the vm_amount variable"
+  value       = var.vm_amount
+}
+
+output "vm_identity" {
+  description = "map with key `Virtual Machine Id`, value `list of identity` created for the Virtual Machine."
+  value       = zipmap(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id, azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.identity)
+}
+
+output "vm_ids" {
+  description = "Virtual machine ids created."
+  value       = azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id
+}
+
+output "vm_name" {
+  description = "The name of the VM"
+  value       = azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.name
+}
+
+output "vm_zones" {
+  description = "map with key `Virtual Machine Id`, value `list of the Availability Zone` which the Virtual Machine should be allocated in."
+  value       = zipmap(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id, azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.zone)
 }
