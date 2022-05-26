@@ -31,7 +31,33 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
       dynamic "ip_configuration" {
         for_each = lookup(var.network_interfaces.network_interface, "ip_configuration", {}) != {} ? [1] : []
         content {
-          name = lookup(var.network_interfaces.network_interface.ip_configuration, "name", null)
+          name                                         = lookup(var.network_interfaces.network_interface.ip_configuration, "name", null)
+          primary                                      = lookup(var.network_interfaces.network_interface.ip_configuration, "primary", null)
+          application_gateway_backend_address_pool_ids = lookup(var.network_interfaces.network_interface.ip_configuration, "application_gateway_backend_address_pool_ids", null)
+          application_security_group_ids               = lookup(var.network_interfaces.network_interface.ip_configuration, "application_security_group_ids", null)
+          load_balancer_backend_address_pool_ids       = lookup(var.network_interfaces.network_interface.ip_configuration, "load_balancer_backend_address_pool_ids", null)
+          load_balancer_inbound_nat_rules_ids          = lookup(var.network_interfaces.network_interface.ip_configuration, "load_balancer_inbound_nat_rules_ids", null)
+          version                                      = lookup(var.network_interfaces.network_interface.ip_configuration, "version", null)
+          subnet_id                                    = lookup(var.network_interfaces.network_interface.ip_configuration, "subnet_id", null)
+
+          dynamic "public_ip_address" {
+            for_each = lookup(var.network_interfaces.network_interface.ip_configuration, "public_ip_address", {}) != {} ? [1] : []
+            content {
+              name                    = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "name", null)
+              domain_name_label       = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "domain_name_label", null)
+              idle_timeout_in_minutes = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "idle_timeout_in_minutes", null)
+              public_ip_prefix_id     = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "public_ip_prefix_id ", null)
+
+              dynamic "ip_tag" {
+                for_each = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "public_ip_address", {}) != {} ? [1] : []
+                content {
+                  type = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "type", null)
+                  tag  = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "tag", null)
+
+                }
+              }
+            }
+          }
         }
       }
     }
