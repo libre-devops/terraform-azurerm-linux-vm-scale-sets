@@ -14,7 +14,7 @@ output "ss_name" {
 
 output "ss_principal_id" {
   value = {
-    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*].identity, 0) : key => value.principal_id
+    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*], 0) : key => element(value.identity, 0).principal_id
   }
   description = "Client ID of system assigned managed identity if created"
 }
