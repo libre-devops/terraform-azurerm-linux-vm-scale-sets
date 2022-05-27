@@ -264,10 +264,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   }
 
   dynamic "admin_ssh_key" {
-    for_each = lookup(var.settings[each.key] "admin_ssh_key", {}) != {} ? [1] : []
+    for_each = lookup(var.settings[each.key], "admin_ssh_key", {}) != {} ? [1] : []
     content {
       public_key = lookup(var.settings[each.key].admin_ssh_key, "public_key", true)
-      username   = lookup(var.settings[each.key].admin_ssh_key, "username", true)
+      username   = var.admin_username
     }
   }
 

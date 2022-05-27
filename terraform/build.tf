@@ -77,6 +77,10 @@ module "linux_scale_set" {
           subnet_id = element(values(module.network.subnets_ids), 0)
         }
       }
+
+      admin_ssh_key = {
+        public_key = data.azurerm_ssh_public_key.mgmt_ssh_key.public_key
+      }
     }
   }
 }
