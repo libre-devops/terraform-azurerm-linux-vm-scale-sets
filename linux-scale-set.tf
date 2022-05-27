@@ -15,42 +15,72 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   edge_zone            = var.edge_zone
   instances            = var.instances
   sku                  = var.vm_size
+  priority             = var.spot_instance ? "Spot" : "Regular"
+  max_bid_price        = var.spot_instance ? var.spot_instance_max_bid_price : null
+  eviction_policy      = var.spot_instance ? var.spot_instance_eviction_policy : null
+
+  dynamic "additional_capabilities" {
+    for_each = lookup(var.settings, "additional_capabilities", {}) != {} ? [1] : []
+    content {
+      ultra_ssd_enabled = lookup(var.settings.additional_capabilities, "ultra_ssd_enabled", false)
+    }
+  }
+
+  dynamic "automatic_os_upgrade_policy" {
+    for_each = lookup(var.settings, "automatic_os_upgrade_policy", {}) != {} ? [1] : []
+    content {
+
+      disable_automatic_rollback  = lookup(var.settings.automatic_os_upgrade_policy, "disable_automatic_rollback", false)
+      enable_automatic_os_upgrade = lookup(var.settings.automatic_os_upgrade_policy, "enable_automatic_os_upgrade", true)
+    }
+  }
+
+  dynamic "automatic_instance_repair" {
+    for_each = lookup(var.settings, "automatic_instance_repair", {}) != {} ? [1] : []
+    content {
+
+      enabled  = lookup(var.settings.automatic_instance_repair, "enabled", true)
+      grace_period = lookup(var.settings.automatic_instance_repair, "grace_period", null)
+    }
+  }
+
+
 
   dynamic "network_interface" {
-    for_each = lookup(var.network_interfaces, "network_interface", {}) != {} ? [1] : []
+    for_each = lookup(var.settings, "network_interface", {}) != {} ? [1] : []
     content {
-      name                          = lookup(var.network_interfaces.network_interface, "name", null)
-      primary                       = lookup(var.network_interfaces.network_interface, "primary", null)
-      network_security_group_id     = lookup(var.network_interfaces.network_interface, "network_security_group_id", null)
-      enable_accelerated_networking = lookup(var.network_interfaces.network_interface, "enable_accelerated_networking", null)
-      enable_ip_forwarding          = lookup(var.network_interfaces.network_interface, "enable_ip_forwarding", null)
-      dns_servers                   = tolist(lookup(var.network_interfaces.network_interface, "dns_servers", null))
+      name                          = lookup(var.settings.network_interface, "name", null)
+      primary                       = lookup(var.settings.network_interface, "primary", null)
+      network_security_group_id     = lookup(var.settings.network_interface, "network_security_group_id", null)
+      enable_accelerated_networking = lookup(var.settings.network_interface, "enable_accelerated_networking", null)
+      enable_ip_forwarding          = lookup(var.settings.network_interface, "enable_ip_forwarding", null)
+      dns_servers                   = tolist(lookup(var.settings.network_interface, "dns_servers", null))
 
       dynamic "ip_configuration" {
-        for_each = lookup(var.network_interfaces.network_interface, "ip_configuration", {}) != {} ? [1] : []
+        for_each = lookup(var.settings.network_interface, "ip_configuration", {}) != {} ? [1] : []
         content {
-          name                                         = lookup(var.network_interfaces.network_interface.ip_configuration, "name", null)
-          primary                                      = lookup(var.network_interfaces.network_interface.ip_configuration, "primary", null)
-          application_gateway_backend_address_pool_ids = lookup(var.network_interfaces.network_interface.ip_configuration, "application_gateway_backend_address_pool_ids", null)
-          application_security_group_ids               = lookup(var.network_interfaces.network_interface.ip_configuration, "application_security_group_ids", null)
-          load_balancer_backend_address_pool_ids       = lookup(var.network_interfaces.network_interface.ip_configuration, "load_balancer_backend_address_pool_ids", null)
-          load_balancer_inbound_nat_rules_ids          = lookup(var.network_interfaces.network_interface.ip_configuration, "load_balancer_inbound_nat_rules_ids", null)
-          version                                      = lookup(var.network_interfaces.network_interface.ip_configuration, "version", null)
-          subnet_id                                    = lookup(var.network_interfaces.network_interface.ip_configuration, "subnet_id", null)
+          name                                         = lookup(var.settings.network_interface.ip_configuration, "name", null)
+          primary                                      = lookup(var.settings.network_interface.ip_configuration, "primary", null)
+          application_gateway_backend_address_pool_ids = lookup(var.settings.network_interface.ip_configuration, "application_gateway_backend_address_pool_ids", null)
+          application_security_group_ids               = lookup(var.settings.network_interface.ip_configuration, "application_security_group_ids", null)
+          load_balancer_backend_address_pool_ids       = lookup(var.settings.network_interface.ip_configuration, "load_balancer_backend_address_pool_ids", null)
+          load_balancer_inbound_nat_rules_ids          = lookup(var.settings.network_interface.ip_configuration, "load_balancer_inbound_nat_rules_ids", null)
+          version                                      = lookup(var.settings.network_interface.ip_configuration, "version", null)
+          subnet_id                                    = lookup(var.settings.network_interface.ip_configuration, "subnet_id", null)
 
           dynamic "public_ip_address" {
-            for_each = lookup(var.network_interfaces.network_interface.ip_configuration, "public_ip_address", {}) != {} ? [1] : []
+            for_each = lookup(var.settings.network_interface.ip_configuration, "public_ip_address", {}) != {} ? [1] : []
             content {
-              name                    = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "name", null)
-              domain_name_label       = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "domain_name_label", null)
-              idle_timeout_in_minutes = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "idle_timeout_in_minutes", null)
-              public_ip_prefix_id     = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "public_ip_prefix_id ", null)
+              name                    = lookup(var.settings.network_interface.ip_configuration.public_ip_address, "name", null)
+              domain_name_label       = lookup(var.settings.network_interface.ip_configuration.public_ip_address, "domain_name_label", null)
+              idle_timeout_in_minutes = lookup(var.settings.network_interface.ip_configuration.public_ip_address, "idle_timeout_in_minutes", null)
+              public_ip_prefix_id     = lookup(var.settings.network_interface.ip_configuration.public_ip_address, "public_ip_prefix_id ", null)
 
               dynamic "ip_tag" {
-                for_each = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address, "public_ip_address", {}) != {} ? [1] : []
+                for_each = lookup(var.settings.network_interface.ip_configuration.public_ip_address, "public_ip_address", {}) != {} ? [1] : []
                 content {
-                  type = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "type", null)
-                  tag  = lookup(var.network_interfaces.network_interface.ip_configuration.public_ip_address.ip_tag, "tag", null)
+                  type = lookup(var.settings.network_interface.ip_configuration.public_ip_address.ip_tag, "type", null)
+                  tag  = lookup(var.settings.network_interface.ip_configuration.public_ip_address.ip_tag, "tag", null)
                 }
               }
             }
@@ -169,10 +199,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   boot_diagnostics {
     storage_account_uri = null // Use managed storage account
   }
-
-  priority        = var.spot_instance ? "Spot" : "Regular"
-  max_bid_price   = var.spot_instance ? var.spot_instance_max_bid_price : null
-  eviction_policy = var.spot_instance ? var.spot_instance_eviction_policy : null
 
   tags = var.tags
 }
