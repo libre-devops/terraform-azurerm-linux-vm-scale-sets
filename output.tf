@@ -1,49 +1,27 @@
-output "asg_id" {
-  description = "The id of the ASG"
-  value       = azurerm_application_security_group.asg.name
+output "ss_id" {
+  value = {
+    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*], 0) : key => value.id
+  }
+  description = "The name of the scale set"
 }
 
-output "asg_name" {
-  description = "The name of the ASG"
-  value       = azurerm_application_security_group.asg.name
+output "ss_name" {
+  value = {
+    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*], 0) : key => value.name
+  }
+  description = "The name of the scale set"
 }
 
-output "nic_id" {
-  description = "The ID of the nics"
-  value       = azurerm_network_interface.nic.*.id
+output "ss_principal_id" {
+  value = {
+    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*].identity, 0) : key => value.principal_id
+  }
+  description = "Client ID of system assigned managed identity if created"
 }
 
-output "nic_ip_config_name" {
-  description = "The name of the IP Configurations"
-  value       = azurerm_network_interface.nic.*.ip_configuration
-}
-
-output "nic_ip_private_ip" {
-  description = "The private IP assigned to the NIC"
-  value       = azurerm_network_interface.nic.*.private_ip_address
-}
-
-output "vm_amount" {
-  description = "The amount of VMs passed to the vm_amount variable"
-  value       = var.vm_amount
-}
-
-output "vm_identity" {
-  description = "map with key `Virtual Machine Id`, value `list of identity` created for the Virtual Machine."
-  value       = zipmap(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id, azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.identity)
-}
-
-output "vm_ids" {
-  description = "Virtual machine ids created."
-  value       = azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id
-}
-
-output "vm_name" {
-  description = "The name of the VM"
-  value       = azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.name
-}
-
-output "vm_zones" {
-  description = "map with key `Virtual Machine Id`, value `list of the Availability Zone` which the Virtual Machine should be allocated in."
-  value       = zipmap(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.id, azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set.*.zone)
+output "unique_ss_id" {
+  value = {
+    for key, value in element(azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set[*], 0) : key => value.unique_id
+  }
+  description = "The id of the scale set"
 }

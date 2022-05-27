@@ -19,7 +19,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   instances                                         = try(each.value.instances, null)
   sku                                               = try(each.value.vm_size, null)
   custom_data                                       = try(each.value.custom_data, null)
-  disable_password_authentication                   = each.value.disable_password_authentication
+  disable_password_authentication                   = try(each.value.disable_password_authenticationm, null)
   do_not_run_extensions_on_overprovisioned_machines = try(each.value.do_not_run_extensions_on_overprovisioned_machines, null)
   extensions_time_budget                            = try(each.value.do_not_run_extensions_on_overprovisioned_machines, null)
   priority                                          = try(each.value.priority, null)
@@ -33,6 +33,11 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   scale_in_policy                                   = try(each.value.scale_in_policy, null)
   secure_boot_enabled                               = try(each.value.secure_boot_enabled, null)
   single_placement_group                            = try(each.value.single_placement_group, null)
+  source_image_id                                   = try(each.value.source_image_id, null)
+  vtpm_enabled                                      = try(each.value.vtpm_enabled, null)
+  zone_balance                                      = try(each.value.zone_balanace, null)
+  zones                                             = tolist(try(each.value.zones, null))
+
 
   #checkov:skip=CKV_AZURE_151:Ensure Encryption at host is enabled
   encryption_at_host_enabled = try(each.value.encryption_at_host_enabled, null)
@@ -52,6 +57,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   dynamic "terminate_notification" {
     for_each = lookup(var.settings[each.key], "terminate_notification", {}) != {} ? [1] : []
+    content {
+      enabled = lookup(var.settings[each.key].terminate_notification, "enabled", null)
+      timeout = lookup(var.settings[each.key].terminate_notification, "timeout", null)
+    }
+  }
+
+  dynamic "termination_notification" {
+    for_each = lookup(var.settings[each.key], "termination_notification", {}) != {} ? [1] : []
     content {
       enabled = lookup(var.settings[each.key].terminate_notification, "enabled", null)
       timeout = lookup(var.settings[each.key].terminate_notification, "timeout", null)
@@ -209,7 +222,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses calculator
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == false ? [1] : []
+    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == false && each.key.source_image_id == null ? [1] : []
     content {
       publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os_calculator[0].calculated_value_os_publisher) : ""
       offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os_calculator[0].calculated_value_os_offer) : ""
@@ -220,7 +233,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses your own source image
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.source_image_reference) > 0 && length(var.plan) == 0 ? [1] : []
+    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.source_image_reference) > 0 && length(var.plan) == 0 && each.key.source_image_id == null ? [1] : []
     content {
       publisher = lookup(var.source_image_reference, "publisher", null)
       offer     = lookup(var.source_image_reference, "offer", null)
@@ -231,7 +244,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // To be used when a VM with a plan is used
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == true ? [1] : []
+    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == true && each.key.source_image_id == null ? [1] : []
     content {
       publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os_calculator_with_plan[0].calculated_value_os_publisher) : ""
       offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os_calculator_with_plan[0].calculated_value_os_offer) : ""
@@ -251,7 +264,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses your own image with custom plan
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.plan) > 0 ? [1] : []
+    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.plan) > 0 && each.key.source_image_id == null ? [1] : []
     content {
       publisher = lookup(var.source_image_reference, "publisher", null)
       offer     = lookup(var.source_image_reference, "offer", null)

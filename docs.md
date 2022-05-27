@@ -19,13 +19,9 @@ No requirements.
 
 | Name | Type |
 |------|------|
-| [azurerm_application_security_group.asg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_security_group) | resource |
 | [azurerm_linux_virtual_machine_scale_set.linux_vm_scale_set](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine_scale_set) | resource |
 | [azurerm_marketplace_agreement.plan_acceptance_custom](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/marketplace_agreement) | resource |
 | [azurerm_marketplace_agreement.plan_acceptance_simple](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/marketplace_agreement) | resource |
-| [azurerm_network_interface.nic](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
-| [azurerm_network_interface_application_security_group_association.asg_association](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface_application_security_group_association) | resource |
-| [azurerm_public_ip.pip](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
 
 ## Inputs
 
@@ -81,13 +77,7 @@ No requirements.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_asg_id"></a> [asg\_id](#output\_asg\_id) | The id of the ASG |
-| <a name="output_asg_name"></a> [asg\_name](#output\_asg\_name) | The name of the ASG |
-| <a name="output_nic_id"></a> [nic\_id](#output\_nic\_id) | The ID of the nics |
-| <a name="output_nic_ip_config_name"></a> [nic\_ip\_config\_name](#output\_nic\_ip\_config\_name) | The name of the IP Configurations |
-| <a name="output_nic_ip_private_ip"></a> [nic\_ip\_private\_ip](#output\_nic\_ip\_private\_ip) | The private IP assigned to the NIC |
-| <a name="output_vm_amount"></a> [vm\_amount](#output\_vm\_amount) | The amount of VMs passed to the vm\_amount variable |
-| <a name="output_vm_identity"></a> [vm\_identity](#output\_vm\_identity) | map with key `Virtual Machine Id`, value `list of identity` created for the Virtual Machine. |
-| <a name="output_vm_ids"></a> [vm\_ids](#output\_vm\_ids) | Virtual machine ids created. |
-| <a name="output_vm_name"></a> [vm\_name](#output\_vm\_name) | The name of the VM |
-| <a name="output_vm_zones"></a> [vm\_zones](#output\_vm\_zones) | map with key `Virtual Machine Id`, value `list of the Availability Zone` which the Virtual Machine should be allocated in. |
+| <a name="output_ss_id"></a> [ss\_id](#output\_ss\_id) | The name of the scale set |
+| <a name="output_ss_name"></a> [ss\_name](#output\_ss\_name) | The name of the scale set |
+| <a name="output_ss_principal_id"></a> [ss\_principal\_id](#output\_ss\_principal\_id) | Client ID of system assigned managed identity if created |
+| <a name="output_unique_ss_id"></a> [unique\_ss\_id](#output\_unique\_ss\_id) | The id of the scale set |
