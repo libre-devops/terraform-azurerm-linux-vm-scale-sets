@@ -41,7 +41,7 @@ module "nsg" {
 }
 
 module "linux_scale_set" {
-  source = "../"
+  source = "registry.terraform.io/libre-devops/linux-vm-scale-sets/azurerm"
 
   rg_name  = module.rg.rg_name
   location = module.rg.rg_location
@@ -78,7 +78,6 @@ module "linux_scale_set" {
         }
       }
     }
-
   }
 }
 
