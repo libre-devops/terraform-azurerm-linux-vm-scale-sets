@@ -1,8 +1,3 @@
-variable "settings" {
-  description = "The settings block"
-  type = any
-}
-
 variable "admin_password" {
   description = "The admin password to be used on the VMSS that will be deployed. The password must meet the complexity requirements of Azure."
   type        = string
@@ -129,6 +124,11 @@ variable "rg_name" {
     condition     = length(var.rg_name) > 1 && length(var.rg_name) <= 24
     error_message = "Resource group name is not valid."
   }
+}
+
+variable "settings" {
+  description = "The settings block"
+  type        = any
 }
 
 variable "source_image_reference" {

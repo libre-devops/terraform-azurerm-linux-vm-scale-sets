@@ -39,7 +39,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     for_each = lookup(var.settings, "automatic_instance_repair", {}) != {} ? [1] : []
     content {
 
-      enabled  = lookup(var.settings.automatic_instance_repair, "enabled", true)
+      enabled      = lookup(var.settings.automatic_instance_repair, "enabled", true)
       grace_period = lookup(var.settings.automatic_instance_repair, "grace_period", null)
     }
   }
