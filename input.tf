@@ -10,49 +10,9 @@ variable "admin_username" {
   default     = "LibreDevOpsAdmin"
 }
 
-variable "allocation_method" {
-  description = "Defines how an IP address is assigned. Options are Static or Dynamic."
-  type        = string
-  default     = "Dynamic"
-}
-
 variable "asg_name" {
-  description = "The name of the application security group to be made"
   type        = string
-}
-
-variable "availability_zone" {
-  default     = null
-  description = "The availability zone for the VMs to be created to"
-  type        = string
-}
-
-variable "computer_name_prefix" {
-  type        = string
-  description = "The name prefix of the scale set"
-}
-
-variable "data_disk_size_gb" {
-  description = "Storage data disk size size."
-  type        = number
-  default     = 30
-}
-
-variable "edge_zone" {
-  type        = string
-  description = "The edge zone for the scale set in the Azure region"
-}
-
-variable "enable_accelerated_networking" {
-  type        = bool
-  description = "(Optional) Enable accelerated networking on Network interface."
-  default     = false
-}
-
-variable "enable_encryption_at_host" {
-  description = "Whether host encryption is enabled"
-  type        = bool
-  default     = false
+  description = "Name of the application security group"
 }
 
 variable "identity_ids" {
@@ -67,35 +27,8 @@ variable "identity_type" {
   default     = ""
 }
 
-variable "instances" {
-  description = "A number, with the amount of VMs which is expected to be created"
-  type        = number
-}
-
-variable "license_type" {
-  description = "Specifies the BYOL Type for this Virtual Machine. This is only applicable to Windows Virtual Machines. Possible values are Windows_Client and Windows_Server"
-  type        = string
-  default     = null
-}
-
 variable "location" {
   description = "The location for this resource to be put in"
-  type        = string
-}
-
-variable "network_interfaces" {
-  description = "The network interfaces block"
-  type        = any
-}
-
-variable "pip_custom_dns_label" {
-  default     = null
-  description = "If you are using a public IP and wish to assign a custom DNS label, set here, otherwise, the VM host name will be used"
-}
-
-variable "pip_name" {
-  default     = null
-  description = "If you are using a Public IP, set the name in this variable"
   type        = string
 }
 
@@ -103,18 +36,6 @@ variable "plan" {
   description = "When a plan VM is used with a image not in the calculator, this will contain the variables used"
   type        = map(any)
   default     = {}
-}
-
-variable "provision_vm_agent" {
-  description = "Whether the Azure agent is installed on this VM, default is true"
-  type        = bool
-  default     = true
-}
-
-variable "public_ip_sku" {
-  default     = null
-  description = "If you wish to assign a public IP directly to your nic, set this to Standard"
-  type        = string
 }
 
 variable "rg_name" {
@@ -126,14 +47,9 @@ variable "rg_name" {
   }
 }
 
-variable "scale_sets" {
-  type        = any
-  description = "The block used to define scale sets"
-}
-
 variable "settings" {
-  description = "The settings block"
   type        = any
+  description = "Used for the settings block"
 }
 
 variable "source_image_reference" {
@@ -142,44 +58,9 @@ variable "source_image_reference" {
   type        = map(any)
 }
 
-variable "spot_instance" {
-  description = "Whether the VM is a spot instance or not"
-  type        = bool
-  default     = false
-}
-
-variable "spot_instance_eviction_policy" {
-  default     = null
-  description = "The eviction policy for a spot instance"
-  type        = string
-}
-
-variable "spot_instance_max_bid_price" {
-  default     = null
-  description = "The max bid price for a spot instance"
-  type        = string
-}
-
 variable "ssh_public_key" {
   description = "The public key to be added to the admin username"
   type        = string
-}
-
-variable "static_private_ip" {
-  default     = null
-  description = "If you are using a static IP, set it in this variable"
-  type        = string
-}
-
-variable "storage_account_type" {
-  description = "Defines the type of storage account to be created. Valid options are Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS."
-  type        = string
-  default     = "Standard_LRS"
-}
-
-variable "subnet_id" {
-  type        = string
-  description = "The subnet ID for the NICs which are created with the VMs to be added to"
 }
 
 variable "tags" {
@@ -201,17 +82,6 @@ variable "use_simple_image_with_plan" {
   default     = false
   description = "If you are using the Windows OS Sku Calculator with plan, set this to true. Default is false"
   type        = bool
-}
-
-variable "vm_hostname" {
-  description = "The hostname of the vm"
-  type        = string
-}
-
-variable "vm_os_disk_size_gb" {
-  default     = "127"
-  description = "The size of the OS Disk in GiB"
-  type        = string
 }
 
 variable "vm_os_id" {

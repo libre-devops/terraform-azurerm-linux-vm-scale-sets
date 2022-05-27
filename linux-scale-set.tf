@@ -6,7 +6,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     azurerm_marketplace_agreement.plan_acceptance_custom
   ]
 
-  for_each            = var.scale_sets
+  for_each            = var.settings
   name                = each.key
   resource_group_name = var.rg_name
   location            = var.location
@@ -46,7 +46,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   provision_vm_agent = try(each.value.provision_vm_agent, null)
 
   dynamic "rolling_upgrade_policy" {
-    for_each = lookup(var.settings[each.key], "rolling_upgrade_policy", {}) != {} && each.value.upgrade_mode == "Automatc" || ach.value.upgrade_mode == "Rolling" ? [1] : []
+    for_each = lookup(var.settings[each.key], "rolling_upgrade_policy", {}) != {} && each.value.upgrade_mode == "Automatc" || each.value.upgrade_mode == "Rolling" ? [1] : []
     content {
       max_batch_instance_percent              = lookup(var.settings[each.key].rolling_upgrade_policy, "max_batch_instance_percent", null)
       max_unhealthy_instance_percent          = lookup(var.settings[each.key].rolling_upgrade_policy, "max_unhealthy_instance_percent", null)
@@ -88,9 +88,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   dynamic "os_disk" {
     for_each = lookup(var.settings[each.key], "os_disk", {}) != {} ? [1] : []
     content {
-      name                      = lookup(var.settings[each.key].os_disk, "name", null)
-      caching                   = lookup(var.settings[each.key].os_disk, "caching", null)
-      storage_account_type      = lookup(var.settings[each.key].os_disk, "storage_account_type", null)
+      name                      = lookup(var.settings[each.key].os_disk, "name", "osdisk-${each.key}")
+      caching                   = lookup(var.settings[each.key].os_disk, "caching", "ReadWrite")
+      storage_account_type      = lookup(var.settings[each.key].os_disk, "storage_account_type", "StandardSSD_LRS")
       disk_size_gb              = lookup(var.settings[each.key].os_disk, "disk_size_gb", null)
       disk_iops_read_write      = lookup(var.settings[each.key].os_disk, "disk_iops_read_write", null)
       disk_mbps_read_write      = lookup(var.settings[each.key].os_disk, "disk_mbps_read_write", null)
@@ -179,8 +179,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   dynamic "network_interface" {
     for_each = lookup(var.settings, "network_interface", {}) != {} ? [1] : []
     content {
-      name                          = lookup(var.settings[each.key].network_interface, "name", null)
-      primary                       = lookup(var.settings[each.key].network_interface, "primary", null)
+      name                          = lookup(var.settings[each.key].network_interface, "name", "nic-${each.key}")
+      primary                       = lookup(var.settings[each.key].network_interface, "primary", true)
       network_security_group_id     = lookup(var.settings[each.key].network_interface, "network_security_group_id", null)
       enable_accelerated_networking = lookup(var.settings[each.key].network_interface, "enable_accelerated_networking", null)
       enable_ip_forwarding          = lookup(var.settings[each.key].network_interface, "enable_ip_forwarding", null)
@@ -189,10 +189,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
       dynamic "ip_configuration" {
         for_each = lookup(var.settings[each.key].network_interface, "ip_configuration", {}) != {} ? [1] : []
         content {
-          name                                         = lookup(var.settings[each.key].network_interface.ip_configuration, "name", null)
-          primary                                      = lookup(var.settings[each.key].network_interface.ip_configuration, "primary", null)
+          name                                         = lookup(var.settings[each.key].network_interface.ip_configuration, "name", "nic-ipconfig-${each.key}")
+          primary                                      = lookup(var.settings[each.key].network_interface.ip_configuration, "primary", true)
           application_gateway_backend_address_pool_ids = lookup(var.settings[each.key].network_interface.ip_configuration, "application_gateway_backend_address_pool_ids", null)
-          application_security_group_ids               = lookup(var.settings[each.key].network_interface.ip_configuration, "application_security_group_ids", null)
+          application_security_group_ids               = lookup(var.settings[each.key].network_interface.ip_configuration, "application_security_group_ids", azurerm_application_security_group.asg.id)
           load_balancer_backend_address_pool_ids       = lookup(var.settings[each.key].network_interface.ip_configuration, "load_balancer_backend_address_pool_ids", null)
           load_balancer_inbound_nat_rules_ids          = lookup(var.settings[each.key].network_interface.ip_configuration, "load_balancer_inbound_nat_rules_ids", null)
           version                                      = lookup(var.settings[each.key].network_interface.ip_configuration, "version", null)
