@@ -262,6 +262,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
       publisher = lookup(var.plan, "publisher", null)
     }
   }
+
   dynamic "admin_ssh_key" {
     for_each = lookup(var.settings[each.key] "admin_ssh_key", {}) != {} ? [1] : []
     content {
