@@ -52,12 +52,11 @@ module "linux_scale_set" {
   vm_os_simple     = "Ubuntu20.04"
   identity_type    = "SystemAssigned"
   asg_name         = "asg-vmss${var.short}${var.loc}${terraform.workspace}-${var.short}-${var.loc}-${terraform.workspace}-01"
-
+  admin_username   = "LibreDevOpsAdmin"
 
   settings = {
     "vmss${var.short}${var.loc}${terraform.workspace}01" = {
 
-      admin_username                  = "LibreDevops"
       sku                             = "Standard_B4ms"
       disable_password_authentication = true
       instances                       = 2

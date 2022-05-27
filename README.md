@@ -55,7 +55,7 @@ module "linux_scale_set" {
   use_simple_image = true
   vm_os_simple     = "Ubuntu20.04"
   identity_type    = "SystemAssigned"
-  asg_name         = "asg-vmss${var.short}${var.loc}${terraform.workspace}01"
+  asg_name         = "asg-vmss${var.short}${var.loc}${terraform.workspace}-${var.short}-${var.loc}-${terraform.workspace}-01"
 
 
   settings = {
@@ -80,6 +80,10 @@ module "linux_scale_set" {
         ip_configuration = {
           subnet_id = element(values(module.network.subnets_ids), 0)
         }
+      }
+
+      admin_ssh_key = {
+        public_key = data.azurerm_ssh_public_key.mgmt_ssh_key.public_key
       }
     }
   }
