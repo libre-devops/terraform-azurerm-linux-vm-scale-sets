@@ -125,9 +125,3 @@ variable "vm_plan" {
   type        = set(string)
   default     = null
 }
-
-variable "vm_size" {
-  description = "Specifies the size of the virtual machine."
-  type        = string
-  default     = "Standard_B2ms"
-}

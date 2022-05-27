@@ -17,7 +17,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   admin_password                                    = try(each.value.admin_password, null)
   edge_zone                                         = try(each.value.edge_zone, null)
   instances                                         = try(each.value.instances, null)
-  sku                                               = try(each.value.vm_size, null)
+  sku                                               = try(each.value.sku, null)
   custom_data                                       = try(each.value.custom_data, null)
   disable_password_authentication                   = try(each.value.disable_password_authenticationm, null)
   do_not_run_extensions_on_overprovisioned_machines = try(each.value.do_not_run_extensions_on_overprovisioned_machines, null)
