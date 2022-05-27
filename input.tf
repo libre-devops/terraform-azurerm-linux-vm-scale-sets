@@ -126,6 +126,11 @@ variable "rg_name" {
   }
 }
 
+variable "scale_sets" {
+  type        = any
+  description = "The block used to define scale sets"
+}
+
 variable "settings" {
   description = "The settings block"
   type        = any
