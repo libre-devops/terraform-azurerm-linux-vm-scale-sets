@@ -22,34 +22,72 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   disable_password_authentication                   = each.value.disable_password_authentication
   do_not_run_extensions_on_overprovisioned_machines = try(each.value.do_not_run_extensions_on_overprovisioned_machines, null)
   extensions_time_budget                            = try(each.value.do_not_run_extensions_on_overprovisioned_machines, null)
+  priority                                          = try(each.value.priority, null)
+  max_bid_price                                     = try(each.value.max_bid_price, null)
+  eviction_policy                                   = try(each.value.eviction_policy, null)
+  health_probe_id                                   = try(each.value.health_probe_id, null)
+  overprovision                                     = try(each.value.overprovision, true)
+  platform_fault_domain_count                       = try(each.value.platform_fault_domain_count, null)
+  upgrade_mode                                      = try(each.value.upgrade_mode, null)
+  proximity_placement_group_id                      = try(each.value.proximity_placement_group_id, null)
+  scale_in_policy                                   = try(each.value.scale_in_policy, null)
+  secure_boot_enabled                               = try(each.value.secure_boot_enabled, null)
+  single_placement_group                            = try(each.value.single_placement_group, null)
+
   #checkov:skip=CKV_AZURE_151:Ensure Encryption at host is enabled
   encryption_at_host_enabled = try(each.value.encryption_at_host_enabled, null)
 
   #checkov:skip=CKV_AZURE_50:Ensure Virtual Machine extensions are not installed
   provision_vm_agent = try(each.value.provision_vm_agent, null)
 
+  dynamic "rolling_upgrade_policy" {
+    for_each = lookup(var.settings[each.key], "rolling_upgrade_policy", {}) != {} && each.value.upgrade_mode == "Automatc" || ach.value.upgrade_mode == "Rolling" ? [1] : []
+    content {
+      max_batch_instance_percent              = lookup(var.settings[each.key].rolling_upgrade_policy, "max_batch_instance_percent", null)
+      max_unhealthy_instance_percent          = lookup(var.settings[each.key].rolling_upgrade_policy, "max_unhealthy_instance_percent", null)
+      max_unhealthy_upgraded_instance_percent = lookup(var.settings[each.key].rolling_upgrade_policy, "max_unhealthy_upgraded_instance_percent", null)
+      pause_time_between_batches              = lookup(var.settings[each.key].rolling_upgrade_policy, "pause_time_between_batches", null)
+    }
+  }
 
-  priority        = var.spot_instance ? "Spot" : "Regular"
-  max_bid_price   = var.spot_instance ? var.spot_instance_max_bid_price : null
-  eviction_policy = var.spot_instance ? var.spot_instance_eviction_policy : null
+  dynamic "terminate_notification" {
+    for_each = lookup(var.settings[each.key], "terminate_notification", {}) != {} ? [1] : []
+    content {
+      enabled = lookup(var.settings[each.key].terminate_notification, "enabled", null)
+      timeout = lookup(var.settings[each.key].terminate_notification, "timeout", null)
+    }
+  }
 
+  dynamic "secret" {
+    for_each = lookup(var.settings[each.key], "secret", {}) != {} ? [1] : []
+    content {
+      key_vault_id = lookup(var.settings[each.key].secret, "key_vault_id", null)
+
+      dynamic "certificate" {
+        for_each = lookup(var.settings[each.key].secret, "certificate", {}) != {} ? [1] : []
+        content {
+          url = lookup(var.settings[each.key].secret.certificate, "url", null)
+        }
+      }
+    }
+  }
 
   dynamic "os_disk" {
     for_each = lookup(var.settings[each.key], "os_disk", {}) != {} ? [1] : []
     content {
-      name                      = try(each.value.name, "${each.key}-osdisk", null)
-      caching                   = try(each.value.caching, "ReadWrite", null)
-      storage_account_type      = try(each.value.storage_account_type, "StandardSSD_LRS", null)
-      disk_size_gb              = try(each.value.disk_size_gb, "127", null)
-      disk_iops_read_write      = try(each.value.disk_iops_read_write, null)
-      disk_mbps_read_write      = try(each.value.disk_mbps_read_write, null)
-      write_accelerator_enabled = try(each.value.write_accelerator_enabled, null)
-      disk_encryption_set_id    = try(each.value.disk_encryption_set_id, null)
+      name                      = lookup(var.settings[each.key].os_disk, "name", null)
+      caching                   = lookup(var.settings[each.key].os_disk, "caching", null)
+      storage_account_type      = lookup(var.settings[each.key].os_disk, "storage_account_type", null)
+      disk_size_gb              = lookup(var.settings[each.key].os_disk, "disk_size_gb", null)
+      disk_iops_read_write      = lookup(var.settings[each.key].os_disk, "disk_iops_read_write", null)
+      disk_mbps_read_write      = lookup(var.settings[each.key].os_disk, "disk_mbps_read_write", null)
+      write_accelerator_enabled = lookup(var.settings[each.key].os_disk, "write_accelerator_enabled", null)
+      disk_encryption_set_id    = lookup(var.settings[each.key].os_disk, "disk_encryption_set_id", null)
 
       dynamic "diff_disk_settings" {
         for_each = lookup(var.settings[each.key].os_disk, "diff_disk_settings", {}) != {} ? [1] : []
         content {
-          option = try(each.value.option, null)
+          option = lookup(var.settings[each.key].os_disk.diff_disk_settings, "option", null)
         }
       }
     }
@@ -58,20 +96,19 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   dynamic "data_disk" {
     for_each = lookup(var.settings[each.key], "data_disk", {}) != {} ? [1] : []
     content {
-      name                      = try(each.value.name, "${each.key}-osdisk", null)
-      caching                   = try(each.value.caching, "ReadWrite", null)
-      lun                       = try(each.value.lun, null)
-      storage_account_type      = try(each.value.storage_account_type, "StandardSSD_LRS", null)
-      disk_size_gb              = try(each.value.disk_size_gb, "127", null)
-      disk_iops_read_write      = try(each.value.disk_iops_read_write, null)
-      disk_mbps_read_write      = try(each.value.disk_mbps_read_write, null)
-      write_accelerator_enabled = try(each.value.write_accelerator_enabled, null)
-      disk_encryption_set_id    = try(each.value.disk_encryption_set_id, null)
+      lun                       = lookup(var.settings[each.key].data_disk, "lun", null)
+      caching                   = lookup(var.settings[each.key].data_disk, "caching", null)
+      storage_account_type      = lookup(var.settings[each.key].data_disk, "storage_account_type", null)
+      disk_size_gb              = lookup(var.settings[each.key].data_disk, "disk_size_gb", null)
+      disk_iops_read_write      = lookup(var.settings[each.key].data_disk, "disk_iops_read_write", null)
+      disk_mbps_read_write      = lookup(var.settings[each.key].data_disk, "disk_mbps_read_write", null)
+      write_accelerator_enabled = lookup(var.settings[each.key].data_disk, "write_accelerator_enabled", null)
+      disk_encryption_set_id    = lookup(var.settings[each.key].data_disk, "disk_encryption_set_id", null)
 
       dynamic "diff_disk_settings" {
         for_each = lookup(var.settings[each.key].data_disk, "diff_disk_settings", {}) != {} ? [1] : []
         content {
-          option = try(each.value.option, null)
+          option = lookup(var.settings[each.key].data_disk.diff_disk_settings, "option", null)
         }
       }
     }
@@ -97,7 +134,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   dynamic "boot_diagnostics" {
     for_each = lookup(var.settings[each.key], "boot_diagnostics", {}) != {} ? [1] : []
     content {
-      storage_account_uri = try(each.value.storage_account_uri, null)
+      storage_account_uri = lookup(var.settings[each.key].boot_diagnostics, "storage_account_uri", null)
     }
   }
 
