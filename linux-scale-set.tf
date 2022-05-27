@@ -56,15 +56,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   }
 
   # To be removed in version 4 of the provider
-  dynamic "terminate_notification" {
-    for_each = lookup(var.settings[each.key], "terminate_notification", {}) != {} ? [1] : []
-    content {
-      enabled = lookup(var.settings[each.key].terminate_notification, "enabled", null)
-      timeout = lookup(var.settings[each.key].terminate_notification, "timeout", null)
-    }
-  }
-
-  # To be removed in version 4 of the provider
   dynamic "termination_notification" {
     for_each = lookup(var.settings[each.key], "termination_notification", {}) != {} ? [1] : []
     content {
@@ -182,7 +173,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
           name                                         = lookup(var.settings[each.key].network_interface.ip_configuration, "name", "nic-ipconfig-${each.key}")
           primary                                      = lookup(var.settings[each.key].network_interface.ip_configuration, "primary", true)
           application_gateway_backend_address_pool_ids = lookup(var.settings[each.key].network_interface.ip_configuration, "application_gateway_backend_address_pool_ids", null)
-          application_security_group_ids               = lookup(var.settings[each.key].network_interface.ip_configuration, "application_security_group_ids", toset(azurerm_application_security_group.asg.id))
+          application_security_group_ids               = lookup(var.settings[each.key].network_interface.ip_configuration, "application_security_group_ids", toset([azurerm_application_security_group.asg.id]))
           load_balancer_backend_address_pool_ids       = lookup(var.settings[each.key].network_interface.ip_configuration, "load_balancer_backend_address_pool_ids", null)
           load_balancer_inbound_nat_rules_ids          = lookup(var.settings[each.key].network_interface.ip_configuration, "load_balancer_inbound_nat_rules_ids", null)
           version                                      = lookup(var.settings[each.key].network_interface.ip_configuration, "version", null)
