@@ -88,12 +88,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   dynamic "os_disk" {
     for_each = lookup(var.settings[each.key], "os_disk", {}) != {} ? [1] : []
     content {
-      name                      = lookup(var.settings[each.key].os_disk, "name", "osdisk-${each.key}")
       caching                   = lookup(var.settings[each.key].os_disk, "caching", "ReadWrite")
       storage_account_type      = lookup(var.settings[each.key].os_disk, "storage_account_type", "StandardSSD_LRS")
       disk_size_gb              = lookup(var.settings[each.key].os_disk, "disk_size_gb", null)
-      disk_iops_read_write      = lookup(var.settings[each.key].os_disk, "disk_iops_read_write", null)
-      disk_mbps_read_write      = lookup(var.settings[each.key].os_disk, "disk_mbps_read_write", null)
       write_accelerator_enabled = lookup(var.settings[each.key].os_disk, "write_accelerator_enabled", null)
       disk_encryption_set_id    = lookup(var.settings[each.key].os_disk, "disk_encryption_set_id", null)
 
@@ -113,17 +110,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
       caching                   = lookup(var.settings[each.key].data_disk, "caching", null)
       storage_account_type      = lookup(var.settings[each.key].data_disk, "storage_account_type", null)
       disk_size_gb              = lookup(var.settings[each.key].data_disk, "disk_size_gb", null)
-      disk_iops_read_write      = lookup(var.settings[each.key].data_disk, "disk_iops_read_write", null)
-      disk_mbps_read_write      = lookup(var.settings[each.key].data_disk, "disk_mbps_read_write", null)
       write_accelerator_enabled = lookup(var.settings[each.key].data_disk, "write_accelerator_enabled", null)
       disk_encryption_set_id    = lookup(var.settings[each.key].data_disk, "disk_encryption_set_id", null)
-
-      dynamic "diff_disk_settings" {
-        for_each = lookup(var.settings[each.key].data_disk, "diff_disk_settings", {}) != {} ? [1] : []
-        content {
-          option = lookup(var.settings[each.key].data_disk.diff_disk_settings, "option", null)
-        }
-      }
     }
   }
 
@@ -222,7 +210,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses calculator
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == false && each.key.source_image_id == null ? [1] : []
+    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == false ? [1] : []
     content {
       publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os_calculator[0].calculated_value_os_publisher) : ""
       offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os_calculator[0].calculated_value_os_offer) : ""
@@ -233,7 +221,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses your own source image
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.source_image_reference) > 0 && length(var.plan) == 0 && each.key.source_image_id == null ? [1] : []
+    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.source_image_reference) > 0 && length(var.plan) == 0 ? [1] : []
     content {
       publisher = lookup(var.source_image_reference, "publisher", null)
       offer     = lookup(var.source_image_reference, "offer", null)
@@ -244,7 +232,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // To be used when a VM with a plan is used
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == true && each.key.source_image_id == null ? [1] : []
+    for_each = try(var.use_simple_image, null) == true && try(var.use_simple_image_with_plan, null) == true ? [1] : []
     content {
       publisher = var.vm_os_id == "" ? coalesce(var.vm_os_publisher, module.os_calculator_with_plan[0].calculated_value_os_publisher) : ""
       offer     = var.vm_os_id == "" ? coalesce(var.vm_os_offer, module.os_calculator_with_plan[0].calculated_value_os_offer) : ""
@@ -264,7 +252,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
 
   // Uses your own image with custom plan
   dynamic "source_image_reference" {
-    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.plan) > 0 && each.key.source_image_id == null ? [1] : []
+    for_each = try(var.use_simple_image, null) == false && try(var.use_simple_image_with_plan, null) == false && length(var.plan) > 0 ? [1] : []
     content {
       publisher = lookup(var.source_image_reference, "publisher", null)
       offer     = lookup(var.source_image_reference, "offer", null)
