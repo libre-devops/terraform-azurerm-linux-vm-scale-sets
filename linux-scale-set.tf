@@ -263,10 +263,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     }
   }
   dynamic "admin_ssh_key" {
-    for_each = var.ssh_public_key != null ? ["fake"] : []
+    for_each = lookup(var.settings[each.key] "admin_ssh_key", {}) != {} ? [1] : []
     content {
-      public_key = var.ssh_public_key
-      username   = var.admin_username
+      public_key = lookup(var.settings[each.key].admin_ssh_key, "public_key", true)
+      username   = lookup(var.settings[each.key].admin_ssh_key, "username", true)
     }
   }
 
@@ -284,7 +284,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
       identity_ids = length(var.identity_ids) > 0 ? var.identity_ids : []
     }
   }
-
 }
 
 module "os_calculator" {
