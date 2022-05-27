@@ -13,7 +13,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   tags                = var.tags
 
   computer_name_prefix                              = try(each.value.computer_name_prefix, null)
-  admin_username                                    = try(each.value.admin_username, null)
+  admin_username                                    = try(each.value.admin_username, var.admin_username)
   admin_password                                    = try(each.value.admin_password, null)
   edge_zone                                         = try(each.value.edge_zone, null)
   instances                                         = try(each.value.instances, null)
