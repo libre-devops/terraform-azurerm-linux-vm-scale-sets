@@ -51,7 +51,7 @@ module "linux_scale_set" {
   use_simple_image = true
   vm_os_simple     = "Ubuntu20.04"
   identity_type    = "SystemAssigned"
-  asg_name         = "asg-${element(regexall("[a-z]+", element(module.linux_scale_set.ss_name, 0)), 0)}-${var.short}-${var.loc}-${terraform.workspace}-01"
+  asg_name         = "asg-vmss${var.short}${var.loc}${terraform.workspace}-${var.short}-${var.loc}-${terraform.workspace}-01"
 
 
   settings = {
