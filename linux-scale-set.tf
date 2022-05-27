@@ -46,7 +46,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   provision_vm_agent = try(each.value.provision_vm_agent, null)
 
   dynamic "rolling_upgrade_policy" {
-    for_each = lookup(var.settings[each.key], "rolling_upgrade_policy", {}) != {} && each.value.upgrade_mode == "Automatc" || each.value.upgrade_mode == "Rolling" ? [1] : []
+    for_each = lookup(var.settings[each.key], "rolling_upgrade_policy", {}) != {} ? [1] : []
     content {
       max_batch_instance_percent              = lookup(var.settings[each.key].rolling_upgrade_policy, "max_batch_instance_percent", null)
       max_unhealthy_instance_percent          = lookup(var.settings[each.key].rolling_upgrade_policy, "max_unhealthy_instance_percent", null)
@@ -55,6 +55,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     }
   }
 
+  # To be removed in version 4 of the provider
   dynamic "terminate_notification" {
     for_each = lookup(var.settings[each.key], "terminate_notification", {}) != {} ? [1] : []
     content {
@@ -63,6 +64,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
     }
   }
 
+  # To be removed in version 4 of the provider
   dynamic "termination_notification" {
     for_each = lookup(var.settings[each.key], "termination_notification", {}) != {} ? [1] : []
     content {
@@ -165,7 +167,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "linux_vm_scale_set" {
   }
 
   dynamic "network_interface" {
-    for_each = lookup(var.settings, "network_interface", {}) != {} ? [1] : []
+    for_each = lookup(var.settings[each.key], "network_interface", {}) != {} ? [1] : []
     content {
       name                          = lookup(var.settings[each.key].network_interface, "name", "nic-${each.key}")
       primary                       = lookup(var.settings[each.key].network_interface, "primary", true)
